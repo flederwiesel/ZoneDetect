@@ -1,0 +1,51 @@
+#!/usr/bin/bash
+
+#VERSION=3.27.4
+#SHA256SUM=e5e060756444d0b2070328a8821c1ceb62bd6d267aae61bfff06f96c7ec943a6
+VERSION=3.27.7
+SHA256SUM=5588e50030cda3e6fa96724444d8539916ac808d78d608cda6ae6ff7c4c4c9c8
+
+SCRIPTDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
+
+if [[ $0 == ${BASH_SOURCE[0]} ]]; then
+	if [ ! -d "${SCRIPTDIR}/cmake-${VERSION}-windows-x86_64/bin" ]; then
+		if [ -f "${SCRIPTDIR}/cmake-${VERSION}-windows-x86_64.zip" ]; then
+			if ! sha256sum --check  >/dev/null <<-EOF
+				${SHA256SUM} ${SCRIPTDIR}/cmake-${VERSION}-windows-x86_64.zip
+EOF
+			then
+				rm "${SCRIPTDIR}/cmake-${VERSION}-windows-x86_64.zip"
+			fi
+		fi
+
+		[ -f "${SCRIPTDIR}/cmake-${VERSION}-windows-x86_64.zip" ] ||
+		wget "https://github.com/Kitware/CMake/releases/download/v${VERSION}/cmake-${VERSION}-windows-x86_64.zip" ||
+		{
+			echo "Error downloading cmake." >&2
+			exit 1
+		}
+
+		sha256sum --check <<EOF || {
+		${SHA256SUM} *${SCRIPTDIR}/cmake-${VERSION}-windows-x86_64.zip
+EOF
+			mv "${SCRIPTDIR}/cmake-${VERSION}-windows-x86_64.zip"{,.0}
+			echo "Checksums mismatch." >&2
+			exit 2
+		}
+
+		unzip -o "${SCRIPTDIR}/cmake-${VERSION}-windows-x86_64.zip" ||
+		{
+			echo "Error unpacking cmake archive." >&2
+			exit 3
+		}
+	fi
+else
+	if "$SHELL" $(realpath "${BASH_SOURCE[0]}") "$@"; then
+		echo "$PATH" | grep -q "cmake-${VERSION}-windows-x86_64/bin" ||
+		export PATH="${SCRIPTDIR}/cmake-${VERSION}-windows-x86_64/bin:$PATH"
+	else
+		echo =$?
+	fi
+fi
+
+#e202611cda835c25523ae512c125fc897dfbc388f5d35e7ab62a94096f34ca9c  cmake-3.27.7-windows-i386.zip
