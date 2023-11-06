@@ -33,7 +33,12 @@
 
 #if !defined(ZD_EXPORT)
 #if defined(_MSC_VER)
+#ifdef BUILD_LIBZONETEDECT
+// https://stackoverflow.com/a/8863220/2735402
+#define ZD_EXPORT __declspec(dllexport)
+#else
 #define ZD_EXPORT __declspec(dllimport)
+#endif
 #else
 #define ZD_EXPORT
 #endif
