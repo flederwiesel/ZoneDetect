@@ -43,6 +43,10 @@
 
 #include "zonedetect.h"
 
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
+
 enum ZDInternalError {
     ZD_OK,
     ZD_E_DB_OPEN,
